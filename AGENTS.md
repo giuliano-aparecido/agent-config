@@ -122,8 +122,12 @@ other assistants keep their own config files (`.cursor/rules`,
 `.github/copilot-instructions.md`, etc.) alongside this shared layer, not
 instead of it. `.claude/agents/` is the one exception worth a shared
 convention: see `agents/code-reviewer.md` in this submodule for a review
-agent meant to be copied into every consuming repo's `.claude/agents/`
-(not symlinked — this workspace's git config has `core.symlinks=false`,
+agent meant to be copied into every consuming repo's `.claude/agents/`.
+Copied, not `@import`ed — confirmed against Claude Code's own docs that
+subagent definition files must be fully self-contained (no external-file
+inclusion mechanism exists for them, unlike `CLAUDE.md`/`AGENTS.md`).
+Also not symlinked: this workspace's git config has `core.symlinks=false`,
 and Windows/cross-platform symlink support is unreliable enough that a
-plain copy, re-synced by hand after edits here, is the more robust
-choice). Keep it in sync after editing the source here.
+plain copy is the more robust choice regardless. Keep it in sync by hand
+after editing the source here — the copy in each repo says as much at
+the top of its own body.
