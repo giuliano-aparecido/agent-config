@@ -71,11 +71,28 @@ their own yet, unless a repo's own docs explicitly say direct pushes are
 fine.
 
 - Branch naming: `feature/`, `fix/`, `docs/`, `refactor/`, `test/` prefixes.
-- Before opening the PR, run whatever build/test/lint gate the repo
-  documents (check its `CONTRIBUTING.md`/`README.md` — commands differ per
-  repo/stack).
 - A PR description should explain *why*, not just *what* — the diff
   already shows what changed.
+
+### Before every commit/push
+
+The main agent (not every subagent it spawns — a subagent doing
+exploratory or intermediate work doesn't need this) always does both of
+these before running `git commit`, and therefore before any `git push`,
+in a repo that includes this submodule:
+
+1. **Run the repo's tests.** Whatever it documents
+   (`CONTRIBUTING.md`/`README.md`/`DEVELOPMENT.md` — `pytest`, `npm run
+   test`, etc.). A failing suite blocks the commit — fix it, or stop and
+   explain why to the user rather than committing around it.
+2. **Invoke the `code-reviewer` subagent** (see "Assistant-agnostic
+   structure" below for where it lives) against the actual diff about to
+   be committed, and address its blocking findings first. Nitpicks are a
+   judgment call; correctness/security findings are not optional to skip.
+
+Do this once per commit, not once for a whole multi-commit branch — each
+commit that lands should individually have been tested and reviewed, not
+just the branch's final state.
 
 ## Production data safety
 
