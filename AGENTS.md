@@ -121,13 +121,21 @@ This doesn't extend to tool-specific runtime config — `.claude/settings*.json`
 other assistants keep their own config files (`.cursor/rules`,
 `.github/copilot-instructions.md`, etc.) alongside this shared layer, not
 instead of it. `.claude/agents/` is the one exception worth a shared
-convention: see `agents/code-reviewer.md` in this submodule for a review
-agent meant to be copied into every consuming repo's `.claude/agents/`.
-Copied, not `@import`ed — confirmed against Claude Code's own docs that
-subagent definition files must be fully self-contained (no external-file
-inclusion mechanism exists for them, unlike `CLAUDE.md`/`AGENTS.md`).
-Also not symlinked: this workspace's git config has `core.symlinks=false`,
-and Windows/cross-platform symlink support is unreliable enough that a
-plain copy is the more robust choice regardless. Keep it in sync by hand
-after editing the source here — the copy in each repo says as much at
-the top of its own body.
+convention: `agents/code-reviewer.md` in this submodule is the single
+canonical source for a review subagent used across every consuming repo.
+Claude Code discovers subagents only from `.claude/agents/*.md` inside
+the repo it's running in, and subagent definition files must be fully
+self-contained — confirmed against Claude Code's own docs that no
+`@import`/external-file-inclusion mechanism exists for them (unlike
+`CLAUDE.md`/`AGENTS.md`). So each consuming repo's own
+`.claude/agents/code-reviewer.md` is a thin stub: the same frontmatter
+(needed for discovery) but a body that just instructs the agent to read
+`agent-config/agents/code-reviewer.md` at runtime and follow it — never
+a full duplicate. That means editing the source here takes effect
+everywhere immediately, with no re-sync step and no drift to catch.
+A plain copy of the *stub itself* (not the content) still needs
+recreating in a repo only if the stub's own wording changes, which
+should be rare. Symlinking the stub instead was considered and rejected:
+this workspace's git config has `core.symlinks=false`, and cross-platform
+symlink support is unreliable enough that even the stub is better off
+as a real, if tiny, file.
