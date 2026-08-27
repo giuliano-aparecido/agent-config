@@ -63,8 +63,8 @@ This doesn't extend to tool-specific runtime config — `.claude/settings*.json`
 other assistants keep their own config files (`.cursor/rules`,
 `.github/copilot-instructions.md`, etc.) alongside this shared layer, not
 instead of it. `.claude/agents/` is the one exception worth a shared
-convention: `agents/code-reviewer.md` in this submodule is the single
-canonical source for a review subagent used across every consuming repo.
+convention: `agents/code-reviewer.md` in this submodule is the canonical
+entry point for a review subagent used across every consuming repo.
 Claude Code discovers subagents only from `.claude/agents/*.md` inside
 the repo it's running in, and subagent definition files must be fully
 self-contained — no `@import`/external-file-inclusion mechanism exists
@@ -80,3 +80,12 @@ should be rare. Symlinking the stub instead was considered and rejected:
 symlink support is inconsistent enough across platforms and git configs
 (`core.symlinks` isn't always on) that even the stub is better off as a
 real, if tiny, file.
+
+Within `agents/code-reviewer.md` itself the same split applies once more:
+it holds only the workspace-specific scoping (which repo you're in, load
+that repo's conventions, read for intent) and a verification pass, then
+defers the review checklist, severity levels, and output format to
+`skills/code-review/SKILL.md`, which it reads at runtime. Change *what* a
+review checks by editing that skill; change *how* a review is scoped in
+this multi-repo workspace by editing the agent file. The skill is also
+directly invokable on its own — it does not depend on the agent file.
