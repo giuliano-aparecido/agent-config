@@ -39,3 +39,9 @@ So a consuming repo needs its own thin stub at
 discovery), but a body that just tells the agent to read that file at
 runtime and follow it. See `AGENTS.md`'s "Assistant-agnostic structure"
 section for why a plain copy, not a symlink.
+
+`agents/code-reviewer.md` keeps only workspace-specific scoping and a
+verification pass, and defers the review checklist, severity levels, and
+output format to `skills/code-review/SKILL.md` (which is also invokable
+on its own). Edit the skill to change what a review checks; edit the
+agent file only for how a review is scoped in this multi-repo workspace.
