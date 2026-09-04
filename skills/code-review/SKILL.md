@@ -175,6 +175,17 @@ ideally be caught by a linter/formatter, not human/agent review time.
   signal to look here, not a trigger on its own — a long comment is fine if every
   sentence earns its keep with genuine non-obvious rationale; flag length only when
   it's padding or restating the code.
+- A stated *why* isn't automatically exempt: every line has some rationale, but only a
+  specific, load-bearing one earns a comment — e.g. a hidden constraint, a business
+  rule, a workaround for a bug/library limitation, a hotfix, an invariant that would
+  break silently if changed, or a concrete tradeoff ("adds ~200ms p99" beats "for
+  performance"). A comment whose rationale is generic enough to justify almost any
+  decision ("this approach was chosen for simplicity/consistency/because it's cleaner")
+  and cites no such specific reason → Major, same as narrate-what. Borderline
+  specificity is a judgment call: a present-but-weak *why* is still more useful than no
+  why at all, so mark it Minor rather than Major — this is a closer case than the
+  Guardrails' general "genuinely subjective → Nit" rule below, since the comment does
+  name *some* rationale.
 - Commented-out code → Minor, request removal (version control preserves history).
 - Stale or misleading comments that no longer match the code → Minor, worse than
   no comment.
