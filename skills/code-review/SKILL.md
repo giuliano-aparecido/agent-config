@@ -179,13 +179,14 @@ ideally be caught by a linter/formatter, not human/agent review time.
   specific, load-bearing one earns a comment — e.g. a hidden constraint, a business
   rule, a workaround for a bug/library limitation, a hotfix, an invariant that would
   break silently if changed, or a concrete tradeoff ("adds ~200ms p99" beats "for
-  performance"). A comment whose rationale is generic enough to justify almost any
-  decision ("this approach was chosen for simplicity/consistency/because it's cleaner")
-  and cites no such specific reason → Major, same as narrate-what. Borderline
-  specificity is a judgment call: a present-but-weak *why* is still more useful than no
-  why at all, so mark it Minor rather than Major — this is a closer case than the
-  Guardrails' general "genuinely subjective → Nit" rule below, since the comment does
-  name *some* rationale.
+  performance"). Anything short of that bar → Major, same as narrate-what — including a
+  generic justification ("for simplicity", "because it's cleaner") or a code-shape claim
+  that never says why the alternative would actually hurt *here* ("keeps call sites a
+  one-liner" alone, without saying what a throw/void alternative would cost this
+  codebase specifically). Don't downgrade to Minor just because the comment names *some*
+  reason — a present-but-vague reason is exactly the failure mode this rule exists to
+  catch. Reserve Nit for the Guardrails' general "genuinely subjective" case: whether a
+  rationale clears the specific/load-bearing bar at all, not how weakly it clears it.
 - Commented-out code → Minor, request removal (version control preserves history).
 - Stale or misleading comments that no longer match the code → Minor, worse than
   no comment.
