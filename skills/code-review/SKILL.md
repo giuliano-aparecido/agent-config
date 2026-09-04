@@ -169,7 +169,12 @@ ideally be caught by a linter/formatter, not human/agent review time.
   just because it looks similar today).
 
 ### 9. Comments & Documentation
-- Comments that compensate for a bad name → suggest rename instead, flag as Minor.
+- Comments that compensate for a bad name → suggest rename instead, flag as Major.
+- Comments that narrate *what* the code does rather than non-obvious *why* → Major,
+  suggest trimming or removing. A multi-paragraph or multi-line comment block is a
+  signal to look here, not a trigger on its own — a long comment is fine if every
+  sentence earns its keep with genuine non-obvious rationale; flag length only when
+  it's padding or restating the code.
 - Commented-out code → Minor, request removal (version control preserves history).
 - Stale or misleading comments that no longer match the code → Minor, worse than
   no comment.
