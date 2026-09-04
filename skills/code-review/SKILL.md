@@ -168,7 +168,7 @@ ideally be caught by a linter/formatter, not human/agent review time.
   (premature abstraction is also a smell — don't force a merge of unrelated logic
   just because it looks similar today).
 
-### 9. Comments & Documentation
+### 9. Comments & Documentation (default: no comment unless a good name can't carry the why; public/exported APIs are the standing exception — see below)
 - Comments that compensate for a bad name → suggest rename instead, flag as Major.
 - Comments that narrate *what* the code does rather than non-obvious *why* → Major.
   Suggest removing the failing sentence(s) outright, not just rewording them — trim
@@ -201,13 +201,31 @@ ideally be caught by a linter/formatter, not human/agent review time.
   public API / exported docs read by callers who can't grep the implementation
   (external consumers, other repos/services) — there, a usage-context statement can be
   the documentation itself, not padding; see the Public API bullet below.
+- Even a specific, true rationale must be *local* to earn its place: relevant to the
+  code it's attached to, not just true somewhere in the system. This is a placement
+  test, separate from whether the why itself is substantive (the specific/load-bearing
+  bar above, including its "invariant that would break silently" case) — a comment can
+  clear that bar and still fail here if the code beside it doesn't act on the fact; if
+  both point to the same root cause on the same comment, that's one finding, not two.
+  If the code doesn't branch on the fact, depend on it, or need a future editor to
+  preserve it, the comment doesn't belong there no matter how concrete the fact is.
+  Passing contrast: a comment justifying a `Map` over an array because lookups happen
+  ~10k times per request and `.includes` would be O(n) per call clears this bar —
+  nothing branches on that fact, but the code depends on it, since reverting the data
+  structure would silently reintroduce the cost with no test to catch it. Failing
+  contrast: a component that renders identically regardless of whether the state it's
+  showing was set by a cron job or a button click doesn't need a comment explaining
+  that ambiguity is "on purpose"; the component doesn't act on that distinction either
+  way, so the explanation (if it belongs anywhere) belongs where the distinction is
+  actually made or consumed, not repeated at every place that merely reads the
+  resulting state. Flag as Major, same bucket as narrate-what.
 - Commented-out code → Minor, request removal (version control preserves history).
 - Stale or misleading comments that no longer match the code → Minor, worse than
   no comment.
 - Missing comments where they matter: non-obvious *why* (business rule, workaround
   for a bug/library limitation) — flag as Minor if absent.
-- Public API / exported function docs: flag Major if missing for a new public
-  interface.
+- Public API / exported docs (function, class, type, or constant): flag Major if
+  missing for a new public interface.
 
 ### 10. Maintainability
 - Magic numbers/strings that should be named constants.
