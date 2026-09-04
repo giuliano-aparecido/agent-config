@@ -170,6 +170,18 @@ ideally be caught by a linter/formatter, not human/agent review time.
 
 ### 9. Comments & Documentation (default: no comment unless a good name can't carry the why; public/exported APIs are the standing exception — see below)
 - Comments that compensate for a bad name → suggest rename instead, flag as Major.
+- Even with a good name, check whether the name already implies the rationale before
+  crediting any comment as load-bearing: read the identifier (function, class,
+  variable) in isolation and ask whether a competent reader would already infer the
+  same conclusion from it alone, no comment needed — e.g. a function named
+  `clampToMaxAttempts` with a comment saying "caps the attempt count at the maximum"
+  adds nothing the name didn't already say. This applies per sentence, the same as
+  narrate-what below: a sentence that only restates the name is cut; a sentence that
+  adds new, name-independent content (even on the same function) is evaluated on its
+  own merits by the bars below, not automatically disqualified alongside it. Flag as
+  Major, same bucket as narrate-what; if a comment also fails a later bar (e.g. the
+  textbook-knowledge case below) for the same underlying fact, that's one finding, not
+  two.
 - Comments that narrate *what* the code does rather than non-obvious *why* → Major.
   Suggest removing the failing sentence(s) outright, not just rewording them — trim
   down to only the sentence(s) that are genuinely load-bearing if any survive, or
@@ -189,6 +201,21 @@ ideally be caught by a linter/formatter, not human/agent review time.
   reason — a present-but-vague reason is exactly the failure mode this rule exists to
   catch. Reserve Nit for the Guardrails' general "genuinely subjective" case: whether a
   rationale clears the specific/load-bearing bar at all, not how weakly it clears it.
+- Two more things that don't count as non-obvious, even when the sentence stating them
+  is true and specific. This sharpens what "break silently" means for the invariant
+  case above, and applies the same detectability lens more generally, whether the risk
+  is a future edit or a present one: (1) a consequence that ordinary code review,
+  tests, type-checking, or just looking at the visible output would catch anyway —
+  "silent" means genuinely hard to detect, not "a comment would have made this easier
+  to notice." A wrong-but-visible UI string, for instance, doesn't qualify — a
+  screenshot or a glance at the two components' output catches it, no comment needed.
+  (2) expected knowledge for anyone who'd touch this kind of code — why you don't
+  blindly retry a non-idempotent POST is textbook HTTP practice, not a fact specific to
+  this system, even though a sentence stating it is perfectly concrete. Flag as Major,
+  same bucket as narrate-what; if this overlaps with the invariant/specific-load-bearing
+  bar above for the same underlying fact, that's one finding, not two. As with the
+  bullet above, whether something clears "textbook" is a judgment call at the margin —
+  reserve Nit for the Guardrails' genuinely-subjective case.
 - A comment stating only *where or how* something is used ("shared by three call
   sites", "called by X and Y") isn't exempt either, even though it's neither pure
   narrate-what nor a stated rationale — for internal code within the reviewed
