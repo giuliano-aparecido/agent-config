@@ -170,10 +170,12 @@ ideally be caught by a linter/formatter, not human/agent review time.
 
 ### 9. Comments & Documentation
 - Comments that compensate for a bad name → suggest rename instead, flag as Major.
-- Comments that narrate *what* the code does rather than non-obvious *why* → Major,
-  suggest trimming or removing. A multi-paragraph or multi-line comment block is a
-  signal to look here, not a trigger on its own — a long comment is fine if every
-  sentence earns its keep with genuine non-obvious rationale; flag length only when
+- Comments that narrate *what* the code does rather than non-obvious *why* → Major.
+  Suggest removing the failing sentence(s) outright, not just rewording them — trim
+  down to only the sentence(s) that are genuinely load-bearing if any survive, or
+  remove the comment entirely if none do. A multi-paragraph or multi-line comment
+  block is a signal to look here, not a trigger on its own — a long comment is fine if
+  every sentence earns its keep with genuine non-obvious rationale; flag length only when
   it's padding or restating the code.
 - A stated *why* isn't automatically exempt: every line has some rationale, but only a
   specific, load-bearing one earns a comment — e.g. a hidden constraint, a business
@@ -187,6 +189,18 @@ ideally be caught by a linter/formatter, not human/agent review time.
   reason — a present-but-vague reason is exactly the failure mode this rule exists to
   catch. Reserve Nit for the Guardrails' general "genuinely subjective" case: whether a
   rationale clears the specific/load-bearing bar at all, not how weakly it clears it.
+- A comment stating only *where or how* something is used ("shared by three call
+  sites", "called by X and Y") isn't exempt either, even though it's neither pure
+  narrate-what nor a stated rationale — for internal code within the reviewed
+  codebase, that's exactly what a find-references/grep search already shows for free
+  to a reader working in it, so writing it down doesn't earn a comment. Flag as Major,
+  same bucket as narrate-what (remove or trim per that bullet's guidance), unless it
+  also explains *why* that reach matters — using the same specific/load-bearing test
+  above, not a generic gloss like "intentional for consistency", which fails that bar
+  exactly as it would for a stated design rationale. This bullet doesn't apply to
+  public API / exported docs read by callers who can't grep the implementation
+  (external consumers, other repos/services) — there, a usage-context statement can be
+  the documentation itself, not padding; see the Public API bullet below.
 - Commented-out code → Minor, request removal (version control preserves history).
 - Stale or misleading comments that no longer match the code → Minor, worse than
   no comment.
