@@ -251,6 +251,34 @@ ideally be caught by a linter/formatter, not human/agent review time.
   no comment.
 - Missing comments where they matter: non-obvious *why* (business rule, workaround
   for a bug/library limitation) — flag as Minor if absent.
+- **Comment removal is a distinct, higher-risk case from missing comments** — the
+  diff is actively deleting something, not just failing to add it, so evaluate
+  every removed comment (not only ones the diff also touches the code around)
+  against the load-bearing bars above before accepting a "trim unnecessary
+  comments" pass at face value. Escalate to **Major** (not Minor) when the removed
+  sentence documented: (a) a previously-diagnosed production bug or regression
+  whose cause isn't re-derivable from the code alone (e.g. "don't pre-encode this —
+  it double-encodes and broke sign-out in prod"), (b) a security- or
+  auth-relevant invariant that isn't obvious from reading the touched
+  function/class in isolation (e.g. an assumption that only held after a related
+  code path changed elsewhere in the system), or (c) a magic number/config value
+  whose safe range is set by an external constraint (a platform limit, an
+  upstream API's own contract, a required relationship between two
+  independently-editable values). The risk isn't absent documentation — it's that
+  this diff is the one reintroducing the exact failure the comment existed to
+  prevent, and nothing else (tests, types, lint) will catch that regression.
+  Restoring a one-line version of just the load-bearing sentence(s) resolves the
+  finding; it does not justify reverting the whole comment block, and the rest of
+  the same block can still be correctly-removed narrate-what/where-used filler.
+- Suppression/pragma directives written as comments (`eslint-disable`,
+  `eslint-disable-next-line`, `@ts-ignore`, `@ts-expect-error`, `# type: ignore`,
+  `# noqa`, `// NOLINT`, etc.) are not documentation and are out of scope for
+  comment-quality cleanup — they change tool behavior (silently re-arming a
+  lint/type error the directive was suppressing), regardless of whether the
+  relevant linter/type-checker currently runs in this repo's CI. Flag removal as
+  **Major**: this is a correctness/tooling regression, not a comment-style
+  judgment call, and "no lint config exists yet" is not a mitigation — it only
+  means the regression is currently invisible rather than absent.
 - Public API / exported docs (function, class, type, or constant): flag Major if
   missing for a new public interface.
 
@@ -313,6 +341,11 @@ Recommendation logic:
   asserting it as an objective flaw.
 - If context is insufficient to judge a finding (e.g. can't tell if a
   boundary violation is intentional), say so and ask, rather than guessing.
+- A diff whose stated purpose is comment trimming/cleanup does not get a lighter
+  pass on section 9 — the opposite: every removed comment is a candidate finding,
+  and the comment-removal escalation rules there mean a "successful" cleanup diff
+  can still surface Major findings even when most of the removals in it were
+  correct.
 - For any action the review would gate that is itself irreversible (this skill
   reviewing the agent's *own* proposed changes, e.g. branch deletions or
   migrations), the default recommendation is Blocker until a human confirms —
