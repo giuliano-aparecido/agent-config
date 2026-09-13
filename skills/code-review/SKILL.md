@@ -349,6 +349,15 @@ Recommendation logic:
 
 ## Guardrails for the Agent
 
+- **This skill is read-only.** The findings report is the entire
+  deliverable — never stage, commit, push, merge, or otherwise mutate the
+  repo (any repo) while running this skill, and never apply your own
+  suggested fix. This holds even for a change that looks trivially small
+  or obviously correct, and even when the surrounding task/conversation's
+  pattern has been "review, then fix, then commit" — that next step
+  belongs to whoever invoked this skill, not to the review itself. Running
+  the test suite or a linter to observe current behavior is fine; changing
+  files or git state is not.
 - Do not invent issues to pad the review — "No issues found" is a valid and
   expected outcome for a section.
 - Do not treat this checklist as a hard gate that blocks merges purely on line
