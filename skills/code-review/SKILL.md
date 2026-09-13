@@ -189,57 +189,78 @@ ideally be caught by a linter/formatter, not human/agent review time.
   block is a signal to look here, not a trigger on its own — a long comment is fine if
   every sentence earns its keep with genuine non-obvious rationale; flag length only when
   it's padding or restating the code.
-- A stated *why* isn't automatically exempt: every line has some rationale, but only a
-  specific, load-bearing one earns a comment — e.g. a hidden constraint, a business
-  rule, a workaround for a bug/library limitation, a hotfix, an invariant that would
-  break silently if changed, or a concrete tradeoff ("adds ~200ms p99" beats "for
-  performance"). Anything short of that bar → Major, same as narrate-what — including a
+- A stated *why* isn't automatically exempt, and the bar here is deliberately high:
+  the ONLY category that earns an inline comment is a workaround for an external
+  library/platform bug or limitation, where the reasoning has no other place to live
+  (not inferable from a test, a type, a linked issue, or a commit message) — e.g. "don't
+  pre-encode this before handing it to URLSearchParams — it already percent-encodes
+  once, and pre-encoding double-encodes; this broke sign-out in prod." A hidden
+  constraint, a business rule, a cross-file invariant, a magic-number/config rationale,
+  a hotfix note, or a "concrete tradeoff" number are NOT enough on their own — see the
+  explicit carve-outs below for the categories this most often shows up as. Anything
+  short of the external-bug-workaround bar → Major, same as narrate-what — including a
   generic justification ("for simplicity", "because it's cleaner") or a code-shape claim
   that never says why the alternative would actually hurt *here* ("keeps call sites a
   one-liner" alone, without saying what a throw/void alternative would cost this
   codebase specifically). Don't downgrade to Minor just because the comment names *some*
-  reason — a present-but-vague reason is exactly the failure mode this rule exists to
-  catch. Reserve Nit for the Guardrails' general "genuinely subjective" case: whether a
-  rationale clears the specific/load-bearing bar at all, not how weakly it clears it.
+  reason — a present-but-vague (or present-but-no-longer-qualifying) reason is exactly
+  the failure mode this rule exists to catch. Reserve Nit for the Guardrails' general
+  "genuinely subjective" case: whether a rationale clears the external-bug-workaround
+  bar at all, not how weakly it clears it.
+- These specific categories do NOT qualify as load-bearing on their own, even though
+  earlier revisions of this skill treated each as sufficient — flag one that's present
+  as Major (narrate-what bucket, per the bullet above), and treat one that's *removed*
+  as a neutral cleanup, not a finding (see the Missing-comments and Comment-removal
+  bullets below):
+  - **Cross-file/cross-module invariants** ("a signed-in session no longer implies X
+    membership since Y changed elsewhere") — accepted as tribal knowledge, or covered by
+    a test that asserts the actual behavior, not spelled out inline.
+  - **Magic-number/config rationale tied to an external constraint** (a platform's
+    timeout ceiling, a cold-start window, a rate limit) — the value itself can get a
+    named constant if it needs a name, but the "why this number" story doesn't need to
+    live next to it.
+  - **Rationale for a suppression/pragma directive** (`eslint-disable-next-line`,
+    `@ts-ignore`, `# noqa`, etc.) — the directive itself must stay (see the separate
+    bullet below on removing those), but a prose explanation of why it's safe to
+    suppress is no longer required or rewarded.
+  Flag a comment that only contains one of these as Major, same bucket as narrate-what.
 - Two more things that don't count as non-obvious, even when the sentence stating them
-  is true and specific. This sharpens what "break silently" means for the invariant
-  case above, and applies the same detectability lens more generally, whether the risk
-  is a future edit or a present one: (1) a consequence that ordinary code review,
-  tests, type-checking, or just looking at the visible output would catch anyway —
-  "silent" means genuinely hard to detect, not "a comment would have made this easier
-  to notice." A wrong-but-visible UI string, for instance, doesn't qualify — a
-  screenshot or a glance at the two components' output catches it, no comment needed.
-  (2) expected knowledge for anyone who'd touch this kind of code — why you don't
-  blindly retry a non-idempotent POST is textbook HTTP practice, not a fact specific to
-  this system, even though a sentence stating it is perfectly concrete. Flag as Major,
-  same bucket as narrate-what; if this overlaps with the invariant/specific-load-bearing
-  bar above for the same underlying fact, that's one finding, not two. As with the
-  bullet above, whether something clears "textbook" is a judgment call at the margin —
-  reserve Nit for the Guardrails' genuinely-subjective case.
+  is true and specific, applying the same detectability lens the categories above rule
+  out on more generally: (1) a consequence that ordinary code review, tests,
+  type-checking, or just looking at the visible output would catch anyway — "silent"
+  means genuinely hard to detect, not "a comment would have made this easier to
+  notice." A wrong-but-visible UI string, for instance, doesn't qualify — a screenshot
+  or a glance at the two components' output catches it, no comment needed. (2) expected
+  knowledge for anyone who'd touch this kind of code — why you don't blindly retry a
+  non-idempotent POST is textbook HTTP practice, not a fact specific to this system,
+  even though a sentence stating it is perfectly concrete. Flag as Major, same bucket as
+  narrate-what; if this overlaps with the external-bug-workaround bar above for the same
+  underlying fact, that's one finding, not two. As with the bullet above, whether
+  something clears "textbook" is a judgment call at the margin — reserve Nit for the
+  Guardrails' genuinely-subjective case.
 - A comment stating only *where or how* something is used ("shared by three call
   sites", "called by X and Y") isn't exempt either, even though it's neither pure
   narrate-what nor a stated rationale — for internal code within the reviewed
   codebase, that's exactly what a find-references/grep search already shows for free
   to a reader working in it, so writing it down doesn't earn a comment. Flag as Major,
   same bucket as narrate-what (remove or trim per that bullet's guidance), unless it
-  also explains *why* that reach matters — using the same specific/load-bearing test
+  also explains *why* that reach matters — using the same external-bug-workaround test
   above, not a generic gloss like "intentional for consistency", which fails that bar
   exactly as it would for a stated design rationale. This bullet doesn't apply to
   public API / exported docs read by callers who can't grep the implementation
   (external consumers, other repos/services) — there, a usage-context statement can be
   the documentation itself, not padding; see the Public API bullet below.
-- Even a specific, true rationale must be *local* to earn its place: relevant to the
-  code it's attached to, not just true somewhere in the system. This is a placement
-  test, separate from whether the why itself is substantive (the specific/load-bearing
-  bar above, including its "invariant that would break silently" case) — a comment can
-  clear that bar and still fail here if the code beside it doesn't act on the fact; if
-  both point to the same root cause on the same comment, that's one finding, not two.
-  If the code doesn't branch on the fact, depend on it, or need a future editor to
-  preserve it, the comment doesn't belong there no matter how concrete the fact is.
-  Passing contrast: a comment justifying a `Map` over an array because lookups happen
-  ~10k times per request and `.includes` would be O(n) per call clears this bar —
-  nothing branches on that fact, but the code depends on it, since reverting the data
-  structure would silently reintroduce the cost with no test to catch it. Failing
+- Even a rationale that clears the external-bug-workaround bar must be *local* to earn
+  its place: relevant to the code it's attached to, not just true somewhere in the
+  system. This is a placement test, separate from whether the why itself qualifies at
+  all — a comment can clear that bar and still fail here if the code beside it isn't
+  the actual workaround; if both point to the same root cause on the same comment,
+  that's one finding, not two. If the code doesn't branch on the fact, depend on it, or
+  need a future editor to preserve it, the comment doesn't belong there no matter how
+  concrete the fact is. Passing contrast: a comment on the exact line that special-cases
+  a known bug in a pinned dependency version (named, with a link to the upstream issue)
+  clears this bar — the workaround code is right there, and removing the comment would
+  strand a future editor with no way to tell the special case isn't dead code. Failing
   contrast: a component that renders identically regardless of whether the state it's
   showing was set by a cron job or a button click doesn't need a comment explaining
   that ambiguity is "on purpose"; the component doesn't act on that distinction either
@@ -249,27 +270,30 @@ ideally be caught by a linter/formatter, not human/agent review time.
 - Commented-out code → Minor, request removal (version control preserves history).
 - Stale or misleading comments that no longer match the code → Minor, worse than
   no comment.
-- Missing comments where they matter: non-obvious *why* (business rule, workaround
-  for a bug/library limitation) — flag as Minor if absent.
+- Missing comments where they matter: a workaround for an external library/platform bug
+  or limitation, with no other place the reasoning is recorded — flag as Minor if
+  absent. Nothing else triggers this bullet anymore: a missing cross-file invariant, a
+  missing magic-number/config rationale, or a missing suppression-directive rationale
+  (the carved-out categories above) is not a finding — those are meant to be tribal
+  knowledge or inferable from tests/types, not written down.
 - **Comment removal is a distinct, higher-risk case from missing comments** — the
   diff is actively deleting something, not just failing to add it, so evaluate
   every removed comment (not only ones the diff also touches the code around)
-  against the load-bearing bars above before accepting a "trim unnecessary
-  comments" pass at face value. Escalate to **Major** (not Minor) when the removed
-  sentence documented: (a) a previously-diagnosed production bug or regression
-  whose cause isn't re-derivable from the code alone (e.g. "don't pre-encode this —
-  it double-encodes and broke sign-out in prod"), (b) a security- or
-  auth-relevant invariant that isn't obvious from reading the touched
-  function/class in isolation (e.g. an assumption that only held after a related
-  code path changed elsewhere in the system), or (c) a magic number/config value
-  whose safe range is set by an external constraint (a platform limit, an
-  upstream API's own contract, a required relationship between two
-  independently-editable values). The risk isn't absent documentation — it's that
-  this diff is the one reintroducing the exact failure the comment existed to
-  prevent, and nothing else (tests, types, lint) will catch that regression.
-  Restoring a one-line version of just the load-bearing sentence(s) resolves the
-  finding; it does not justify reverting the whole comment block, and the rest of
-  the same block can still be correctly-removed narrate-what/where-used filler.
+  against the external-bug-workaround bar above before accepting a "trim unnecessary
+  comments" pass at face value. Escalate to **Major** (not Minor) only when the removed
+  sentence documented a previously-diagnosed workaround for an external library/
+  platform bug or limitation, whose reasoning has no other place to live (e.g. "don't
+  pre-encode this before handing it to URLSearchParams — it already percent-encodes
+  once, and pre-encoding double-encodes; this broke sign-out in prod"). A removed
+  comment that instead stated a cross-file invariant, a magic-number/config rationale,
+  or a suppression-directive rationale (the carved-out categories above) is NOT an
+  escalation case — treat its removal as ordinary, unremarkable cleanup, not a finding.
+  Where this escalation DOES apply, the risk isn't absent documentation in general —
+  it's that this diff is the one reintroducing the exact failure the comment existed to
+  prevent, and nothing else (tests, types, lint) will catch that regression. Restoring a
+  one-line version of just the load-bearing sentence(s) resolves the finding; it does
+  not justify reverting the whole comment block, and the rest of the same block can
+  still be correctly-removed filler.
 - Suppression/pragma directives written as comments (`eslint-disable`,
   `eslint-disable-next-line`, `@ts-ignore`, `@ts-expect-error`, `# type: ignore`,
   `# noqa`, `// NOLINT`, etc.) are not documentation and are out of scope for
