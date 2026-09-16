@@ -15,7 +15,16 @@ explain *why it matters*, not just *what rule it breaks*.
 
 1. **Scope the diff** — identify changed files, new files, deleted files. Review
    changed/added code in full context (read surrounding unchanged code too — a
-   function can look fine in isolation and still violate SRP in context).
+   function can look fine in isolation and still violate SRP in context). If
+   there's no diff to scope (a full-codebase/no-PR review), treat every
+   tracked source file as in scope instead — skip build artifacts, lockfiles,
+   vendored/generated code, and binary/data files — and expect several
+   checklist sections to legitimately produce no findings on a mature
+   codebase; name those in the coverage line rather than forcing a finding.
+   Prioritize Correctness and Security in the output even more heavily than
+   usual, and roll up a smell repeated across many files into one systemic
+   finding with representative file:line citations rather than one finding
+   per occurrence.
 2. **Run each checklist section below** against the diff, in the order given
    (Correctness → Security → then the rest) — don't lead with style while a bug
    or vulnerability goes unmentioned.
