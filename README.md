@@ -20,6 +20,13 @@ combination is what makes it load automatically for Claude specifically:
 the repo's `CLAUDE.md` should be the one-line `@AGENTS.md` pointer, whose
 target in turn imports this file.
 
+This repo deliberately has no `CLAUDE.md` of its own. Claude Code also
+loads a nested `CLAUDE.md` whenever it reads a file under that directory,
+and every consumer's review reads `agents/` and `skills/` here — so a
+pointer at this root would load `AGENTS.md` a second time in every one of
+those sessions. Its content already reaches Claude through the consumer's
+import chain above.
+
 To pick up an update after editing something here:
 
 ```bash
@@ -38,10 +45,5 @@ So a consuming repo needs its own thin stub at
 [`agents/code-reviewer.md`](agents/code-reviewer.md) (needed for
 discovery), but a body that just tells the agent to read that file at
 runtime and follow it. See `AGENTS.md`'s "Assistant-agnostic structure"
-section for why a plain copy, not a symlink.
-
-`agents/code-reviewer.md` keeps only workspace-specific scoping and a
-verification pass, and defers the review checklist, severity levels, and
-output format to `skills/code-review/SKILL.md` (which is also invokable
-on its own). Edit the skill to change what a review checks; edit the
-agent file only for how a review is scoped in this multi-repo workspace.
+section for why a plain copy, not a symlink, and for how the agent/skill
+split works and which file to edit for what.

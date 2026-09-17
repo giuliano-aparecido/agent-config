@@ -6,17 +6,28 @@ description: Use this skill to perform a structured code review of a diff, pull 
 # Code Review Skill
 
 ## Purpose
-Perform a systematic, reproducible code review of the given diff/PR. Output must be
+Perform a systematic, reproducible code review of the given diff, PR, or file set. Output must be
 structured findings (not prose essays) so it can be posted as PR comments or
 aggregated into a report. Every finding must reference a specific file/line and
 explain *why it matters*, not just *what rule it breaks*.
 
 ## Review Process
 
-1. **Scope the diff** — identify changed files, new files, deleted files. Review
+1. **Scope the review** — identify changed files, new files, deleted files. Review
    changed/added code in full context (read surrounding unchanged code too — a
-   function can look fine in isolation and still violate SRP in context).
-2. **Run each checklist section below** against the diff, in the order given
+   function can look fine in isolation and still violate SRP in context). When
+   the review is explicitly a full-codebase/no-PR review (the request names no
+   diff, PR, or commit range), treat every tracked source file as in scope
+   instead — skip build artifacts, lockfiles, vendored/generated code, and
+   binary/data files — and expect several checklist sections to legitimately
+   produce no findings on a mature codebase; name those in the coverage line
+   rather than forcing a finding. An empty `git diff` on its own is not this
+   mode — right after a commit the work is in `git log -p` or the commit
+   range, not the working tree. Prioritize Correctness and Security in the
+   output even more heavily than usual, and roll up a smell repeated across
+   many files into one systemic finding with representative file:line
+   citations rather than one finding per occurrence.
+2. **Run each checklist section below** against the in-scope code, in the order given
    (Correctness → Security → then the rest) — don't lead with style while a bug
    or vulnerability goes unmentioned.
 3. **Deduplicate** — one root cause should produce one finding, not five repeated
