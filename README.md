@@ -20,6 +20,13 @@ combination is what makes it load automatically for Claude specifically:
 the repo's `CLAUDE.md` should be the one-line `@AGENTS.md` pointer, whose
 target in turn imports this file.
 
+This repo deliberately has no `CLAUDE.md` of its own. Claude Code also
+loads a nested `CLAUDE.md` whenever it reads a file under that directory,
+and every consumer's review reads `agents/` and `skills/` here — so a
+pointer at this root would load `AGENTS.md` a second time in every one of
+those sessions. Its content already reaches Claude through the consumer's
+import chain above.
+
 To pick up an update after editing something here:
 
 ```bash
