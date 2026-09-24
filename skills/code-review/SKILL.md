@@ -193,6 +193,19 @@ ideally be caught by a linter/formatter, not human/agent review time.
   Major, same bucket as narrate-what; if a comment also fails a later bar (e.g. the
   textbook-knowledge case below) for the same underlying fact, that's one finding, not
   two.
+- The same preemption test applies to the code's own visible SHAPE, not just its
+  name: before crediting a sentence as a non-obvious *why*, check whether a
+  competent reader would already see the same fact by looking directly at the
+  code the comment sits on, independent of naming. A regex alternation where
+  several branches already carry a `(?:s|ed|ing)?`-style suffix doesn't need a
+  sentence saying "these need their -ing and past-tense forms too" — the
+  suffixes themselves show it; a function that already takes a `default:
+  T | None = None` parameter doesn't need a sentence saying "the caller may
+  omit this." This is the same detectability lens as the textbook-knowledge/
+  visible-output bar further below, applied one level earlier: not "would a
+  test catch a wrong result" but "does looking at this exact code already tell
+  the reader the fact this sentence claims to add." Flag as Major, same bucket
+  as narrate-what.
 - Comments that narrate *what* the code does rather than non-obvious *why* → Major.
   Suggest removing the failing sentence(s) outright, not just rewording them — trim
   down to only the sentence(s) that are genuinely load-bearing if any survive, or
@@ -219,6 +232,23 @@ ideally be caught by a linter/formatter, not human/agent review time.
   distinct check from the length signal above: that one asks whether each
   sentence is *about* something real; this one asks whether a sentence that
   passes that test is still saying more than the code beside it needs.
+- **A comment covering more than one independently-justifiable design decision
+  about DIFFERENT sub-parts of the same declaration is a bundling finding**, even
+  when every individual fact in it clears every other bar here. A regex
+  alternation, a dataclass with several fields, or a function with multiple
+  branches each earning their own real *why* should carry each explanation LOCAL
+  to the specific sub-part it justifies (an inline comment on that one
+  alternative/field/branch), not stacked into a single preface comment covering
+  the whole declaration — a reader trying to understand why one specific branch
+  looks the way it does shouldn't have to read and mentally re-attribute a
+  paragraph explaining several unrelated branches to find the one sentence that's
+  actually about the code in front of them. Test: does the comment contain more
+  than one sentence that would still make sense read completely on its own, with
+  no shared subject or dependency between them? If so, it's bundling multiple
+  facts, not elaborating one. Flag as Major, same bucket as narrate-what, and
+  suggest splitting: move each fact down to sit next to the sub-part it actually
+  explains, trimming or cutting any that don't survive the other bars once
+  isolated from the others' company.
 - **The same qualifying fact restated across more than one comment in a diff is a
   duplication finding, not several valid comments.** When a diff explains the same
   external-bug-workaround fact near a constant, again near the function that uses
