@@ -200,6 +200,44 @@ ideally be caught by a linter/formatter, not human/agent review time.
   block is a signal to look here, not a trigger on its own — a long comment is fine if
   every sentence earns its keep with genuine non-obvious rationale; flag length only when
   it's padding or restating the code.
+- **Clearing the external-bug-workaround bar caps *what* can be said, not how much.**
+  Once a comment identifies the qualifying fact, restate only the fact and its
+  consequence for the code beside it — not the investigation that discovered it.
+  Specific reproduction data, exact numbers from a live check, dates, and the
+  step-by-step reasoning that led to the fix belong in the commit message or PR
+  description, which is where a future reader looks for *how someone figured this
+  out*; the inline comment is where they look for *the constraint they must not
+  violate*. A comment attached to a declaration (a variable, a constant, a single
+  function signature) should describe only what's non-obvious about *that*
+  declaration — if most of its sentences are actually about the surrounding
+  system, the module's problem space, or the general shape of the fix, that
+  content is misplaced, not merely long. Test: could the qualifying fact be
+  stated in 1-2 sentences without losing anything a future editor needs to avoid
+  reintroducing the bug? If yes, flag the excess as Major, same bucket as
+  narrate-what, and suggest cutting to that 1-2 sentence version with the rest
+  moved to the commit message (or deleted if it's pure narrative). This is a
+  distinct check from the length signal above: that one asks whether each
+  sentence is *about* something real; this one asks whether a sentence that
+  passes that test is still saying more than the code beside it needs.
+- **The same qualifying fact restated across more than one comment in a diff is a
+  duplication finding, not several valid comments.** When a diff explains the same
+  external-bug-workaround fact near a constant, again near the function that uses
+  it, and again in a test, only the location closest to where the workaround
+  actually happens (typically the function/line that branches on or depends on the
+  fact) should carry the full explanation — every other occurrence should be a
+  one-clause pointer to it ("see `_normalize_pence_quote`'s docstring") or removed
+  outright. Flag every occurrence beyond the first genuinely necessary one as
+  Major, same bucket as narrate-what, and name the file:line of the location that
+  should keep the explanation.
+- **Consistency with the surrounding file's existing comment style is never a
+  reason to skip the checks above.** A codebase that already has a habit of
+  long, evidence-heavy comments is a pre-existing condition to note (optionally,
+  as a separate systemic finding per the full-codebase-review rule in the Review
+  Process section) — it is not a justification for a new comment in the diff
+  being reviewed. Judge every new or changed comment against these bars on its
+  own; "the file already does this" answers a different question (is this
+  diff introducing a new problem) than the one this checklist asks (does this
+  comment, here, earn its content).
 - A stated *why* isn't automatically exempt, and the bar here is deliberately high:
   the ONLY category that earns an inline comment is a workaround for an external
   library/platform bug or limitation, where the reasoning has no other place to live
