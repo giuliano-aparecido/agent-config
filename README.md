@@ -47,3 +47,12 @@ discovery), but a body that just tells the agent to read that file at
 runtime and follow it. See `AGENTS.md`'s "Assistant-agnostic structure"
 section for why a plain copy, not a symlink, and for how the agent/skill
 split works and which file to edit for what.
+
+## License
+
+Dual-licensed under either of
+
+- [MIT license](LICENSE-MIT)
+- [Apache License, Version 2.0](LICENSE-APACHE)
+
+at your option.
