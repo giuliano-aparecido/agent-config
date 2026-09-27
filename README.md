@@ -1,5 +1,7 @@
 # agent-config
 
+*An experimental project exploring agentic coding workflows with Claude Code.*
+
 Fleet-wide, tool-agnostic conventions for AI coding assistants, meant to
 be shared across multiple independent repos as a git submodule rather
 than copy-pasted into each one by hand.
