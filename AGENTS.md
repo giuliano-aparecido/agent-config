@@ -9,17 +9,22 @@ that is what's written here.
 **Any time source code, tests, or scripts are written or changed in a
 consuming repo — new code, bug fixes, refactors, test-only changes,
 however small — the work is done by the `clean-coder` subagent, without
-exception.** The main agent briefs it with the task and the relevant
-context, then reviews and integrates its result; it does not write code
-itself. Docs, prose, and agent/skill definition files are not code for this
-rule. A tool or agent with no `clean-coder` subagent available (Cursor,
-Copilot, Codex, a subagent that cannot spawn subagents) follows
-`skills/clean-code/SKILL.md` directly instead. `clean-coder` follows `skills/clean-code/SKILL.md`
-(Clean Code rules: names over comments, small single-purpose functions,
-no comment that restates, narrates, or points elsewhere), and the
-`code-reviewer` subagent reviews against the same skill. `clean-coder`
-edits files and runs the repo's tests; it never commits, pushes, or
-opens PRs — that stays with the main agent under the rules below.
+exception.** Configuration that is executed (CI YAML, SQL migrations,
+Dockerfiles, build files) counts as code. Docs, prose, and agent/skill
+definition files do not. The main agent briefs `clean-coder` with the task
+and the relevant context, then reviews and integrates its result; it does
+not write code itself.
+
+A tool or agent with no `clean-coder` subagent available (Cursor, Copilot,
+Codex, a subagent that cannot spawn subagents) follows
+`skills/clean-code/SKILL.md` directly instead.
+
+`clean-coder` follows `skills/clean-code/SKILL.md` (Clean Code rules: names
+over comments, small single-purpose functions, no comment that restates,
+narrates, or points elsewhere), and `code-reviewer` reviews against the same
+rules. `clean-coder` edits files and runs the repo's tests; it never
+commits, pushes, or opens PRs — that stays with the main agent under the
+rules below.
 
 ## Git workflow
 
@@ -104,9 +109,11 @@ it holds only the workspace-specific scoping (which repo you're in, load
 that repo's conventions, read for intent) and a verification pass, then
 defers the checks, severity levels, and output format to
 `skills/code-review/SKILL.md` and the rules to `skills/clean-code/SKILL.md`,
-which it reads at runtime. `agents/clean-coder.md` follows the same pattern for
-writing code and reads the same `SKILL.md`, so writer and reviewer apply
-one rule set. Change *what* is considered clean by editing that skill;
-change *how* a review or a writing task is scoped in this multi-repo
-workspace by editing the agent files. The skill is also directly invokable
-on its own — it does not depend on the agent files.
+which it reads at runtime. `agents/clean-coder.md` follows the same
+pattern for writing code and reads `skills/clean-code/SKILL.md`, so writer
+and reviewer apply one rule set. Change *what* is considered clean by editing
+`skills/clean-code/SKILL.md`; change *what a review checks and how it reports*
+by editing `skills/code-review/SKILL.md`; change *how* a review or a writing
+task is scoped in this multi-repo workspace by editing the agent files.
+`skills/clean-code` is directly invokable on its own and does not depend on
+the agent files; `skills/code-review` builds on `skills/clean-code`.
