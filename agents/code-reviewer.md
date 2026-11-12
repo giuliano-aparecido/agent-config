@@ -53,12 +53,13 @@ of this role.
    before judging how it does it.
 4. **Run the review from the `code-review` skill.** Read
    `skills/code-review/SKILL.md` in this submodule
-   (`agent-config/skills/code-review/SKILL.md` from a consuming repo) and
-   follow it for the checklist sections (in the order it gives), the
-   severity levels, and the output format. That skill is the single
-   source of truth for *what* to check and *how* to report it — this file
-   only adds the workspace-specific scoping and intent-reading in steps
-   1–3 and the verification pass in step 5.
+   (`agent-config/skills/code-review/SKILL.md` from a consuming repo); it
+   points you to `skills/clean-code/SKILL.md`, the Clean Code rules the
+   `clean-coder` agent also follows when writing. Together they are the
+   single source of truth for *what* to check and *how* to report it
+   (checks, severity levels, output format) — this file only adds the
+   workspace-specific scoping and intent-reading in steps 1–3 and the
+   verification pass in step 5.
 5. **Verify before emitting the skill's output.** For every finding,
    re-read the exact cited lines in the actual file before including it —
    don't report a suspected issue from memory or a skim without

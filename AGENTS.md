@@ -4,6 +4,23 @@ A repo's own `AGENTS.md`/`CONTRIBUTING.md` can narrow or override
 anything below by saying so explicitly; the default in the absence of
 that is what's written here.
 
+## Writing code: always through `clean-coder`
+
+**Any time source code, tests, or scripts are written or changed in a
+consuming repo — new code, bug fixes, refactors, test-only changes,
+however small — the work is done by the `clean-coder` subagent, without
+exception.** The main agent briefs it with the task and the relevant
+context, then reviews and integrates its result; it does not write code
+itself. Docs, prose, and agent/skill definition files are not code for this
+rule. A tool or agent with no `clean-coder` subagent available (Cursor,
+Copilot, Codex, a subagent that cannot spawn subagents) follows
+`skills/clean-code/SKILL.md` directly instead. `clean-coder` follows `skills/clean-code/SKILL.md`
+(Clean Code rules: names over comments, small single-purpose functions,
+no comment that restates, narrates, or points elsewhere), and the
+`code-reviewer` subagent reviews against the same skill. `clean-coder`
+edits files and runs the repo's tests; it never commits, pushes, or
+opens PRs — that stays with the main agent under the rules below.
+
 ## Git workflow
 
 **Never commit or push directly to `main`/`master`.** Cut a feature
@@ -63,16 +80,17 @@ This doesn't extend to tool-specific runtime config — `.claude/settings*.json`
 other assistants keep their own config files (`.cursor/rules`,
 `.github/copilot-instructions.md`, etc.) alongside this shared layer, not
 instead of it. `.claude/agents/` is the one exception worth a shared
-convention: `agents/code-reviewer.md` in this submodule is the canonical
-entry point for a review subagent used across every consuming repo.
+convention: `agents/code-reviewer.md` and `agents/clean-coder.md` in this
+submodule are the canonical entry points for the review and writing
+subagents used across every consuming repo.
 Claude Code discovers subagents only from `.claude/agents/*.md` inside
 the repo it's running in, and subagent definition files must be fully
 self-contained — no `@import`/external-file-inclusion mechanism exists
 for them (unlike `CLAUDE.md`/`AGENTS.md`). So each consuming repo's own
-`.claude/agents/code-reviewer.md` is a thin stub: the same frontmatter
-(needed for discovery) but a body that just instructs the agent to read
-`agent-config/agents/code-reviewer.md` at runtime and follow it — never
-a full duplicate. That means editing the source here takes effect
+`.claude/agents/code-reviewer.md` and `.claude/agents/clean-coder.md` are
+thin stubs: the same frontmatter (needed for discovery) but a body that
+just instructs the agent to read `agent-config/agents/<name>.md` at
+runtime and follow it — never a full duplicate. That means editing the source here takes effect
 everywhere immediately, with no re-sync step and no drift to catch.
 A plain copy of the *stub itself* (not the content) still needs
 recreating in a repo only if the stub's own wording changes, which
@@ -84,8 +102,11 @@ real, if tiny, file.
 Within `agents/code-reviewer.md` itself the same split applies once more:
 it holds only the workspace-specific scoping (which repo you're in, load
 that repo's conventions, read for intent) and a verification pass, then
-defers the review checklist, severity levels, and output format to
-`skills/code-review/SKILL.md`, which it reads at runtime. Change *what* a
-review checks by editing that skill; change *how* a review is scoped in
-this multi-repo workspace by editing the agent file. The skill is also
-directly invokable on its own — it does not depend on the agent file.
+defers the checks, severity levels, and output format to
+`skills/code-review/SKILL.md` and the rules to `skills/clean-code/SKILL.md`,
+which it reads at runtime. `agents/clean-coder.md` follows the same pattern for
+writing code and reads the same `SKILL.md`, so writer and reviewer apply
+one rule set. Change *what* is considered clean by editing that skill;
+change *how* a review or a writing task is scoped in this multi-repo
+workspace by editing the agent files. The skill is also directly invokable
+on its own — it does not depend on the agent files.
