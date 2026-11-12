@@ -37,14 +37,20 @@ git add agent-config
 git commit -m "Bump agent-config"
 ```
 
-## The `code-reviewer` subagent
+## The `code-reviewer` and `clean-coder` subagents
+
+Both agents apply the same rules from
+[`skills/clean-code/SKILL.md`](skills/clean-code/SKILL.md):
+`code-reviewer` reviews code against them, `clean-coder` writes code
+following them (and `AGENTS.md` requires it for any code change).
 
 Claude Code only discovers subagents from `.claude/agents/*.md` inside
 the repo it's actually running in, and subagent definition files can't
 `@import` another file's content — they must be fully self-contained.
 So a consuming repo needs its own thin stub at
-`.claude/agents/code-reviewer.md`: the same frontmatter as
-[`agents/code-reviewer.md`](agents/code-reviewer.md) (needed for
+`.claude/agents/code-reviewer.md` and `.claude/agents/clean-coder.md`:
+the same frontmatter as [`agents/code-reviewer.md`](agents/code-reviewer.md)
+and [`agents/clean-coder.md`](agents/clean-coder.md) (needed for
 discovery), but a body that just tells the agent to read that file at
 runtime and follow it. See `AGENTS.md`'s "Assistant-agnostic structure"
 section for why a plain copy, not a symlink, and for how the agent/skill
