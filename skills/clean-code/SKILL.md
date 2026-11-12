@@ -7,11 +7,9 @@ description: The Clean Code rules (Robert C. Martin) shared by whoever writes co
 
 One rule set for writing and reviewing. A writer follows it so the reviewer
 finds nothing; a reviewer flags only what it forbids. Source: *Clean Code*
-(Martin, 2008); chapter numbers in parentheses. A few rules are house rules
-stricter than or beyond the book, marked *(house)*: constant/unit comments and
-worked examples in comments and suppression directives (section 3), parse
-external data once (section 7),
-a final raising `else` (section 11). Where a repo's own
+(Martin, 2008); chapter numbers in parentheses. LSP and ISP come from
+Martin's SOLID writings, not from this book. Rules marked *(house)* are
+stricter than, or beyond, the book. Where a repo's own
 `AGENTS.md`/`CONTRIBUTING.md` documents a deliberate deviation, the repo wins.
 
 Leave the code cleaner than you found it (Boy Scout Rule), but only inside
@@ -24,13 +22,13 @@ the code you are already changing.
   (`data`, `info`, `manager`, `helper`, `temp`), no encodings or prefixes.
 - Meaningful distinctions, pronounceable and searchable names. A literal used
   more than once, or whose meaning is not obvious, becomes a named constant.
-  Put the unit in the name when it is not obvious (`timeout_seconds`).
+  *(house)* Put the unit in the name when it is not obvious (`timeout_seconds`).
 - Classes and variables are nouns, methods are verbs, booleans read as
   predicates (`is_valid`). One word per concept across the codebase
   (not `fetch`/`get`/`retrieve` for the same thing).
 - Name length follows scope: short in a small scope, long and exact in a wide one.
-- A vague verb or a name that only restates its body (`process`, `handle`,
-  `_solve_rate`) is a finding even when a docstring explains it. Rename so the
+- *(house)* A vague verb or a name that only restates its body (`process`,
+  `handle`, `_solve_rate`) is a finding even when a docstring explains it. Rename so the
   name says what is computed and how (`_find_rate_where_npv_is_zero`). A name
   that lies (`doublings` holding a multiplier) is worse than a vague one.
 
@@ -38,7 +36,8 @@ the code you are already changing.
 - Small, and do one thing. Check: can you extract another function from it
   with a name that is not a restatement of its body? Then it does more than one thing.
 - One level of abstraction per function; read top-down (step-down rule).
-- Arguments: zero is best, then one, two, three. More than three become an object.
+- Arguments: zero is best, then one, two, three. Avoid more than three and
+  justify any exception; an argument object is one way out.
   No flag arguments (split into two functions). No output arguments.
 - No side effects, no hidden temporal coupling. Command-query separation:
   change state or answer a question, not both.
@@ -59,11 +58,10 @@ Acceptable, when the code cannot say it by itself:
 - **Intent**: why a decision was taken, when the code shows only what.
 - **Clarification** of something you cannot change (a library return value, a standard).
 - **Warning of consequences** ("not thread-safe", "this test takes minutes").
-- **TODO** with an owner or ticket, **amplification** of an easily missed detail.
+- **TODO**, **amplification** of an easily missed detail. *(house)* A TODO
+  names an owner or a ticket.
 - **Public API docs** for code used by callers who cannot read the source.
-  Not a docstring on every function. A new public interface with none is a gap.
-- Also a gap: code that hides a non-obvious intent or a dangerous consequence
-  (a workaround for a library bug, a required call order) with no comment saying so.
+  Not a docstring on every function.
 
 Not acceptable, and each one is a finding:
 - Redundant or narrating comments (restate the name or the next line), mumbling,
@@ -81,13 +79,19 @@ Not acceptable, and each one is a finding:
   Keep the constraint a future editor must respect, in one or two sentences.
 - **Non-local information**: describing code elsewhere ("see `span_days`",
   "used by X and Y"). Say it where the thing lives, or nowhere.
-- One comment explaining several unrelated decisions: put each next to the part it explains.
-- The same fact repeated in several comments: keep one, at the place that depends on it.
+- *(house)* One comment explaining several unrelated decisions: put each next
+  to the part it explains.
+- *(house)* The same fact repeated in several comments: keep one, at the place
+  that depends on it.
 - Docstrings on private or internal functions that restate the signature.
 - Journal or attribution comments, position markers, closing-brace comments,
   commented-out code (delete it, version control remembers).
 - *(house)* Deleting a suppression directive (`# noqa`, `eslint-disable`,
   `@ts-ignore`) is a behavior change, not a comment cleanup.
+
+Gaps *(house)*, reported as Minor: a new public interface with no docs, or code
+that hides a non-obvious intent or a dangerous consequence (a workaround for a
+library bug, a required call order) with no comment saying so.
 
 ## 4. Formatting (ch. 5)
 - Follow the repo's formatter/linter config; do not hand-format against it.
@@ -142,7 +146,10 @@ Not acceptable, and each one is a finding:
 - One concept per test. Readable: arrange, act, assert, with the same care as production code.
 - Test names state behavior. Test behavior through the public interface, not internals.
 - Cover boundary conditions and error paths, not only the happy path.
-- No skipped or disabled test without a tracked reason.
+- A test must be able to fail: it asserts an outcome the code under test
+  produces. A negative test ("does nothing when disabled") is fine when a
+  positive case proves the behavior is reachable.
+- *(house)* No skipped or disabled test without a tracked reason.
 
 ## 11. Smells and heuristics (ch. 17)
 Flag, and when writing avoid:

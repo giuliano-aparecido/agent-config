@@ -72,11 +72,12 @@ read-only: the findings report is the whole deliverable.
 | Level | Meaning | Examples |
 |---|---|---|
 | **Blocker** | Must fix before merge | Security issue, broken logic, data loss risk, breaks a public API contract, unguarded irreversible operation |
-| **Major** | Should fix before merge | SRP violation, missing error handling, untested critical path, boundary violation, a comment forbidden by clean-code section 3 (narrating, redundant, too much information, non-local, commented-out code), a name that needs a comment, a flag argument, non-exhaustive dispatch over a closed set, removing a suppression directive (`# noqa`, `eslint-disable`, `@ts-ignore`; it re-arms a suppressed error), deleting a comment that carried intent or a warning of consequences |
+| **Major** | Should fix before merge | SRP violation, missing error handling, untested critical path, boundary violation, any comment forbidden by clean-code section 3 (narrating, redundant, too much information, non-local, unit or worked-example, bundled, repeated, commented-out code, a misleading comment, a private docstring that restates the signature), a name that needs a comment, a flag argument, non-exhaustive dispatch over a closed set, removing a suppression directive (`# noqa`, `eslint-disable`, `@ts-ignore`; it re-arms a suppressed error), deleting a comment that carried intent or a warning of consequences |
 | **Minor** | Should fix, non-blocking | Long function, duplication, 4+ arguments, stale comment, magic number |
 | **Nit** | Optional | Formatting, consistency, personal preference |
 
-A new public interface with no docs, and code hiding a non-obvious intent or
+A stale comment (outdated but not wrong in a way that misleads) is Minor. A
+new public interface with no docs, and code hiding a non-obvious intent or
 dangerous consequence with no comment (clean-code section 3), are Minor. Any
 other clean-code item not named in the table also defaults to Minor. Only
 correctness, security, and architecture reach Blocker. "Style" here means
